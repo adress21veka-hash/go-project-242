@@ -27,9 +27,8 @@ func main() {
 			if err != nil {
 				return fmt.Errorf("файлы ошибку принесли")
 			}
-			fmt.Println("%s	%s", files, path)
+			fmt.Printf("%s	%s", files, path)
 			return nil
-
 		},
 	}
 
