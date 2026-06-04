@@ -16,13 +16,14 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	}
 
 	if !info.IsDir() {
-		return fmt.Sprintf("%s	%s", sizeOfFile(info), path), nil
+		return sizeOfFile(info), nil
 	}
 
 	if info.IsDir() {
-		return fmt.Sprintf("%s	%s", sizeOfSumFiles(path), path), nil
+		return sizeOfSumFiles(path), nil
 	}
 
+	return "", errors.New("Ошибка, ничего не подошло под условия")
 }
 
 func sizeOfFile(info os.FileInfo) string {
