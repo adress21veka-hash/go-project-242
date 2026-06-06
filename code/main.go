@@ -12,7 +12,7 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	info, err := os.Stat(path)
 
 	if err != nil {
-		return "", errors.New("Ошибка в определении это файл или папка")
+		return "", errors.New("ошибка в определении это файл или папка")
 	}
 
 	if !info.IsDir() {
@@ -23,7 +23,7 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 		return sizeOfSumFiles(path), nil
 	}
 
-	return "", errors.New("Ошибка, ничего не подошло под условия")
+	return "", errors.New("ошибка, ничего не подошло под условия")
 }
 
 func sizeOfFile(info os.FileInfo) string {
