@@ -4,64 +4,76 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
+	"strings"
 )
 
 func GetPathSize(path string, recursive, human, all bool) (string, error) {
-
 	info, err := os.Stat(path)
-
 	if err != nil {
 		return "", errors.New("ошибка в определении это файл или папка")
 	}
 
 	if !info.IsDir() {
-		return sizeOfFile(info), nil
+		size := info.Size()
+		if human {
+			return convertToHuman(size), nil
+		}
+		return fmt.Sprintf("%d B", size), nil
 	}
 
 	if info.IsDir() {
-		return sizeOfSumFiles(path), nil
+		size, err := sizeOfSumFiles(path, all)
+		if err != nil {
+			return "", err
+		}
+		if human {
+			return convertToHuman(size), nil
+		}
+		return fmt.Sprintf("%d B", size), nil
 	}
 
 	return "", errors.New("ошибка, ничего не подошло под условия")
 }
 
-func sizeOfFile(info os.FileInfo) string {
-	return fmt.Sprintf("%dB", info.Size())
-}
-
-func sizeOfSumFiles(path string) string {
-
-	filesindirectory := getFilesInDirectory(path)
-	return sizeOfFiles(filesindirectory)
-
-}
-
-func getFilesInDirectory(path string) []string {
-	var files []string
-
+func sizeOfSumFiles(path string, all bool) (int64, error) {
+	var total int64
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return nil
+		return 0, err
 	}
-
-	for _, e := range entries {
-		if !e.IsDir() {
-			files = append(files, filepath.Join(path, e.Name()))
+	for _, entry := range entries {
+		// если all=false — пропускаем скрытые (начинаются с точки)
+		if !all && strings.HasPrefix(entry.Name(), ".") {
+			continue
 		}
-	}
-
-	return files
-}
-
-func sizeOfFiles(files []string) string {
-	var total int64
-	for _, f := range files {
-		info, err := os.Stat(f)
+		info, err := entry.Info()
 		if err != nil {
 			continue
 		}
 		total += info.Size()
 	}
-	return fmt.Sprintf("%dB", total)
+	return total, nil
+}
+
+func convertToHuman(bytes int64) string {
+	units := []struct {
+		name string
+		size int64
+	}{
+		{"EB", 1 << 60},
+		{"PB", 1 << 50},
+		{"TB", 1 << 40},
+		{"GB", 1 << 30},
+		{"MB", 1 << 20},
+		{"KB", 1 << 10},
+		{"B", 1},
+	}
+
+	for _, u := range units {
+		if bytes >= u.size && bytes%u.size == 0 {
+			return fmt.Sprintf("%d %s", bytes/u.size, u.name)
+		}
+	}
+
+	return fmt.Sprintf("%d B", bytes)
 }
