@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,7 +23,7 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	}
 
 	if info.IsDir() {
-		size, err := sizeOfSumFiles(path, all)
+		size, err := sizeOfSumFiles(path, recursive, all)
 		if err != nil {
 			return "", err
 		}
@@ -35,23 +36,36 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	return "", errors.New("ошибка, ничего не подошло под условия")
 }
 
-func sizeOfSumFiles(path string, all bool) (int64, error) {
+func sizeOfSumFiles(path string, recursive, all bool) (int64, error) {
 	var total int64
+
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return 0, err
 	}
+
 	for _, entry := range entries {
-		// если all=false — пропускаем скрытые (начинаются с точки)
 		if !all && strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
+
 		info, err := entry.Info()
 		if err != nil {
 			continue
 		}
-		total += info.Size()
+
+		if entry.IsDir() && recursive {
+			subSize, err := sizeOfSumFiles(filepath.Join(path, entry.Name()), all, recursive)
+			if err != nil {
+				continue
+			}
+			total += subSize
+		} else if !entry.IsDir() {
+			total += info.Size()
+		}
+
 	}
+
 	return total, nil
 }
 

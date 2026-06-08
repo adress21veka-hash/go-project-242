@@ -36,6 +36,14 @@ func main() {
 					return pathSize(ctx, cmd, false, false, true)
 				},
 			},
+			&cli.BoolFlag{
+				Name:    "recursive",
+				Aliases: []string{"r"},
+				Usage:   "recursive size of directories",
+				Action: func(ctx context.Context, cmd *cli.Command, value bool) error {
+					return pathSize(ctx, cmd, true, false, false)
+				},
+			},
 		},
 	}
 
