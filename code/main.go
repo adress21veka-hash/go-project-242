@@ -19,7 +19,7 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 		if human {
 			return convertToHuman(size), nil
 		}
-		return fmt.Sprintf("%d B", size), nil
+		return fmt.Sprintf("%dB", size), nil
 	}
 
 	if info.IsDir() {
@@ -30,7 +30,7 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 		if human {
 			return convertToHuman(size), nil
 		}
-		return fmt.Sprintf("%d B", size), nil
+		return fmt.Sprintf("%dB", size), nil
 	}
 
 	return "", errors.New("ошибка, ничего не подошло под условия")
@@ -80,12 +80,11 @@ func convertToHuman(bytes int64) string {
 		{"GB", 1 << 30},
 		{"MB", 1 << 20},
 		{"KB", 1 << 10},
-		{"B", 1},
 	}
 
 	for _, u := range units {
-		if bytes >= u.size && bytes%u.size == 0 {
-			return fmt.Sprintf("%d %s", bytes/u.size, u.name)
+		if bytes >= u.size {
+			return fmt.Sprintf("%.1f %s", float64(bytes)/float64(u.size), u.name)
 		}
 	}
 
