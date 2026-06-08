@@ -55,7 +55,7 @@ func sizeOfSumFiles(path string, recursive, all bool) (int64, error) {
 		}
 
 		if entry.IsDir() && recursive {
-			subSize, err := sizeOfSumFiles(filepath.Join(path, entry.Name()), all, recursive)
+			subSize, err := sizeOfSumFiles(filepath.Join(path, entry.Name()), recursive, all)
 			if err != nil {
 				continue
 			}
@@ -84,7 +84,7 @@ func convertToHuman(bytes int64) string {
 
 	for _, u := range units {
 		if bytes >= u.size {
-			return fmt.Sprintf("%.1f %s", float64(bytes)/float64(u.size), u.name)
+			return fmt.Sprintf("%.1f%s", float64(bytes)/float64(u.size), u.name)
 		}
 	}
 
